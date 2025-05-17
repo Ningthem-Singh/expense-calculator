@@ -11,3 +11,4 @@ Route::get('/expenses/{date}', [ExpenseController::class, 'expenses_showByDate']
 Route::get('/expenses/{expense}/edit', [ExpenseController::class, 'expenses_edit'])->name('expenses_edit');
 Route::put('/expenses/{expense}', [ExpenseController::class, 'expenses_update'])->name('expenses_update');
 Route::delete('/expenses/{expense}', [ExpenseController::class, 'expenses_destroy'])->name('expenses_destroy');
+Route::get('/expenses/load-more', [ExpenseController::class, 'expenses_load_more'])->name('expenses_load_more');

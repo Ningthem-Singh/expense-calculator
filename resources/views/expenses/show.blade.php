@@ -5,10 +5,10 @@
 
     <a href="{{ route('expenses_index') }}" class="btn btn-secondary mb-3">Back</a>
 
-    <ul class="list-group">
+    <ul class="list-group" style="border: 1px solid black">
         @foreach ($expenses as $expense)
-            <li class="list-group-item">
-                {{ $expense->title }} - ₹{{ number_format($expense->amount, 2) }}
+            <li class="list-group-item" style="border: 2px solid grey">
+                <b>{{ $expense->title }} - ₹{{ number_format($expense->amount, 2) }}</b>
                 @if ($expense->description)
                     <p class="mt-2"><em>{{ $expense->description }}</em></p>
                 @endif

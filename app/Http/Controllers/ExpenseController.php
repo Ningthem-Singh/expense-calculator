@@ -13,8 +13,9 @@ class ExpenseController extends Controller
     // Show all expenses grouped by date
     public function expenses_index()
     {
-        $expenses = Expense::orderBy('date', 'desc')->get()->groupBy('date');
-        return view('expenses.index', compact('expenses'));
+        $expenses = Expense::orderBy('date', 'desc')->orderBy('id', 'desc')->cursorPaginate(10);
+        $groupedExpenses = $expenses->groupBy('date');
+        return view('expenses.index', compact('expenses', 'groupedExpenses'));
     }
 
     // Show form to create a new expense
@@ -39,25 +40,18 @@ class ExpenseController extends Controller
 
             // Handle file upload
             if ($request->hasFile('expense_proof')) {
-                $filePath = $request->file('expense_proof')->store('expense_proofs', 'public'); // Store in public/storage/expense_proofs
+                $filePath = $request->file('expense_proof')->store('expense_proofs', 'public');
                 $validatedData['expense_proof'] = $filePath;
             }
 
-            // Create the expense
             Expense::create($validatedData);
-
-            // Commit the transaction
             DB::commit();
 
             return redirect()->route('expenses_index')->with('success', 'Expense added successfully!');
         } catch (\Exception $e) {
-            // Rollback the transaction in case of an error
             DB::rollBack();
-
-            // Log the error
             Log::error('Error adding expense: ' . $e->getMessage());
 
-            // Return an error message to the user
             return redirect()->back()->withInput()->withErrors(['error' => 'An error occurred while adding the expense. Please try again.']);
         }
     }
@@ -146,5 +140,21 @@ class ExpenseController extends Controller
             // Return an error message to the user
             return redirect()->back()->withErrors(['error' => 'An error occurred while deleting the expense. Please try again.']);
         }
+    }
+
+    public function expenses_load_more(Request $request)
+    {
+        $cursor = $request->query('cursor');
+
+        // Fetch cursor-paginated expenses starting from the given cursor
+        $expenses = Expense::orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate(10, ['*'], 'cursor', $cursor);
+
+        // Group expenses by date
+        $groupedExpenses = $expenses->groupBy('date');
+
+        // Return the partial view with the new expenses
+        return view('expenses.partials.expense-list', compact('expenses', 'groupedExpenses'))->render();
     }
 }

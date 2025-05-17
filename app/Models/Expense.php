@@ -6,5 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Expense extends Model
 {
-    protected $guarded=[];
+    protected $fillable = [
+        'title',
+        'description',
+        'amount',
+        'date',
+        'expense_proof',
+    ];
 }

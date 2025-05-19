@@ -157,4 +157,25 @@ class ExpenseController extends Controller
         }
     }
 
+    public function expenses_calendar()
+    {
+        return view('expenses.calendar');
+    }
+
+    public function expenses_calendar_data()
+    {
+        // Fetch all expenses and format them for FullCalendar
+        $expenses = Expense::all();
+
+        $events = $expenses->map(function ($expense) {
+            return [
+                'id' => $expense->id,
+                'title' => $expense->title,
+                'start' => $expense->date, // FullCalendar expects dates in 'YYYY-MM-DD' format
+                'amount' => $expense->amount, // Custom property to display the amount
+            ];
+        });
+
+        return response()->json($events);
+    }
 }

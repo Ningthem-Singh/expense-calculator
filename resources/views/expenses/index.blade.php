@@ -15,6 +15,7 @@
         </div>
     @endif
     <a href="{{ route('expenses_create') }}" class="btn btn-primary mb-3">Add Expense</a>
+    <a href="{{ route('expenses_calendar') }}" class="btn btn-primary mb-3">Show in Calendar style</a>
 
     <div id="expenses-container">
         @include('expenses.partials/expense_list', ['groupedExpenses' => $groupedExpenses])

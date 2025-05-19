@@ -38,7 +38,6 @@ class ExpenseController extends Controller
         try {
             DB::beginTransaction();
 
-            // Handle file upload
             if ($request->hasFile('expense_proof')) {
                 $filePath = $request->file('expense_proof')->store('expense_proofs', 'public');
                 $validatedData['expense_proof'] = $filePath;
@@ -71,42 +70,42 @@ class ExpenseController extends Controller
             'amount' => 'required|numeric',
             'date' => 'required|date',
             'expense_proof' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf|max:10240', // Max 10MB
+            'remove_proof' => 'nullable|boolean',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Handle file upload
             if ($request->hasFile('expense_proof')) {
                 // Delete old file if it exists
                 if ($expense->expense_proof) {
                     Storage::disk('public')->delete($expense->expense_proof);
                 }
-
                 $filePath = $request->file('expense_proof')->store('expense_proofs', 'public');
                 $validatedData['expense_proof'] = $filePath;
             }
 
-            $expense->update($validatedData);
+            if ($request->input('remove_proof')) {
+                if ($expense->expense_proof) {
+                    Storage::disk('public')->delete($expense->expense_proof);
+                }
+                $validatedData['expense_proof'] = null; // Set proof to null
+            }
 
+            $expense->update($validatedData);
             DB::commit();
 
             return redirect()->route('expenses_index')->with('success', 'Expense updated successfully!');
         } catch (\Exception $e) {
-            // Rollback the transaction in case of an error
+
             DB::rollBack();
-
-            // Log the error
             Log::error('Error updating expense: ' . $e->getMessage());
-
-            // Return an error message to the user
             return redirect()->back()->withInput()->withErrors(['error' => 'An error occurred while updating the expense. Please try again.']);
         }
     }
 
     public function expenses_edit(Expense $expense)
     {
-        // Log::info('Expense Data:', $expense->toArray());
         if (!$expense) {
             abort(404, 'Expense not found');
         }
@@ -118,26 +117,18 @@ class ExpenseController extends Controller
         try {
             DB::beginTransaction();
 
-            // Delete the associated proof file if it exists
             if ($expense->expense_proof) {
                 Storage::disk('public')->delete($expense->expense_proof);
             }
 
-            // Delete the expense
             $expense->delete();
-
-            // Commit the transaction
             DB::commit();
 
             return redirect()->route('expenses_index')->with('success', 'Expense deleted successfully!');
         } catch (\Exception $e) {
-            // Rollback the transaction in case of an error
             DB::rollBack();
-
-            // Log the error
             Log::error('Error deleting expense: ' . $e->getMessage());
 
-            // Return an error message to the user
             return redirect()->back()->withErrors(['error' => 'An error occurred while deleting the expense. Please try again.']);
         }
     }
@@ -146,15 +137,12 @@ class ExpenseController extends Controller
     {
         $cursor = $request->query('cursor');
 
-        // Fetch cursor-paginated expenses starting from the given cursor
         $expenses = Expense::orderBy('date', 'desc')
             ->orderBy('id', 'desc')
             ->cursorPaginate(10, ['*'], 'cursor', $cursor);
 
-        // Group expenses by date
         $groupedExpenses = $expenses->groupBy('date');
 
-        // Return the partial view with the new expenses
         return view('expenses.partials.expense-list', compact('expenses', 'groupedExpenses'))->render();
     }
 }

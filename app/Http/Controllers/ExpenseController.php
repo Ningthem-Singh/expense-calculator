@@ -15,7 +15,27 @@ class ExpenseController extends Controller
     {
         $expenses = Expense::orderBy('date', 'desc')->orderBy('id', 'desc')->cursorPaginate(10);
         $groupedExpenses = $expenses->groupBy('date');
-        return view('expenses.index', compact('expenses', 'groupedExpenses'));
+
+        // Convert the next cursor to a string
+        $nextCursor = $expenses->nextCursor()?->encode(); // Encode the cursor to a string
+        // $nextCursor = $expenses->nextCursor();
+        // dd($nextCursor);
+        return view('expenses.index', compact('expenses', 'groupedExpenses', 'nextCursor'));
+    }
+
+    public function expenses_load_more(Request $request)
+    {
+        $cursor = $request->query('cursor');
+
+        $expenses = Expense::orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate(10, ['*'], 'cursor', $cursor);
+
+        $groupedExpenses = $expenses->groupBy('date');
+
+        $nextCursor = $expenses->nextCursor()?->encode(); // Encode the cursor to a string
+
+        return view('expenses.partials.expense_list', compact('expenses', 'groupedExpenses', 'nextCursor'))->render();
     }
 
     // Show form to create a new expense
@@ -58,6 +78,10 @@ class ExpenseController extends Controller
     // Show expenses for a specific date
     public function expenses_showByDate($date)
     {
+        // Validate the date format
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            abort(404, 'Invalid date format.');
+        }
         $expenses = Expense::where('date', $date)->get();
         return view('expenses.show', compact('expenses', 'date'));
     }
@@ -133,16 +157,4 @@ class ExpenseController extends Controller
         }
     }
 
-    public function expenses_load_more(Request $request)
-    {
-        $cursor = $request->query('cursor');
-
-        $expenses = Expense::orderBy('date', 'desc')
-            ->orderBy('id', 'desc')
-            ->cursorPaginate(10, ['*'], 'cursor', $cursor);
-
-        $groupedExpenses = $expenses->groupBy('date');
-
-        return view('expenses.partials.expense-list', compact('expenses', 'groupedExpenses'))->render();
-    }
 }

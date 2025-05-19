@@ -1,3 +1,6 @@
+<!-- Hidden Input for Next Cursor -->
+<input type="hidden" id="next-cursor" value="{{ $nextCursor }}">
+
 @foreach ($groupedExpenses as $date => $dailyExpenses)
     <div class="card mb-3">
         <div class="card-header">
@@ -22,6 +25,3 @@
         </ul>
     </div>
 @endforeach
-
-<!-- Hidden Input for Next Cursor -->
-<input type="hidden" id="next-cursor" value="{{ $expenses->nextCursor() }}">

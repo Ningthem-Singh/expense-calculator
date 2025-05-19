@@ -17,6 +17,7 @@
 
 
 <script src="{{ asset('assets/js/bootstrap5.min.js') }}"></script>
+<script src="{{ asset('assets/js/full_calendar_v6.js') }}"></script>
 @yield('scripts')
 
 </html>

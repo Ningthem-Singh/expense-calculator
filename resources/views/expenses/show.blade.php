@@ -43,7 +43,7 @@
                 </div>
                 <div class="modal-body">
                     <!-- Preview Content -->
-                    <div id="previewContent"></div>
+                    <div id="previewContent" class="d-flex justify-content-center"></div>
                 </div>
             </div>
         </div>

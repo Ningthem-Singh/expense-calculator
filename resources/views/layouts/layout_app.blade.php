@@ -7,6 +7,7 @@
     <title>Expense Calculator</title>
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/font-awesome6.css') }}">
+    <link rel="stylesheet" href="{{asset('assets/css/custom_full_calendar.css')}}">
 </head>
 
 <body>

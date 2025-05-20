@@ -169,10 +169,11 @@ class ExpenseController extends Controller
 
         $events = $expenses->map(function ($expense) {
             return [
-                'id' => $expense->id,
+                // 'id' => $expense->id,
                 'title' => $expense->title,
                 'start' => $expense->date, // FullCalendar expects dates in 'YYYY-MM-DD' format
                 'amount' => $expense->amount, // Custom property to display the amount
+                'description' => $expense->description,
             ];
         });
 

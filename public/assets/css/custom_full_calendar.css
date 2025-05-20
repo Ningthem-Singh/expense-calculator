@@ -1,0 +1,17 @@
+/* Default style for calendar events */
+.fc-event {
+    cursor: pointer;
+    /* Change cursor to pointer */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Smooth transitions */
+}
+
+/* Hover effect for calendar events */
+.fc-event-hover {
+    transform: scale(1.1);
+    /* Enlarge the event more prominently */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    /* Add a deeper shadow */
+    z-index: 100;
+    /* Bring the hovered event to the front */
+}

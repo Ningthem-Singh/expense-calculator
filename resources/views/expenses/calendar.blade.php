@@ -51,21 +51,22 @@
                         },
                         views: {
                             multiMonthYear: {
-                                type: 'multiMonth', // Use the dayGrid plugin for Year View
+                                type: 'multiMonth',
                                 duration: {
                                     years: 1
-                                }, // Show one year at a time
-                                buttonText: 'Multi-Month' // Button text for Year View
+                                },
+                                buttonText: 'Multi-Month'
                             }
                         },
                         events: data, // Pass the fetched expenses as events
                         eventContent: function(arg) {
-                            // console.log('====================================');
-                            // console.log(arg);
-                            // console.log('====================================');
-                            // Customize how events are displayed
+                            // Format the amount using Intl.NumberFormat
+                            const formattedAmount = formatAmount(arg.event.extendedProps
+                                .amount);
+
+                            // Return the HTML for the event
                             return {
-                                html: `<strong>${arg.event.title}</strong><br>₹${arg.event.extendedProps.amount}`
+                                html: `<strong>${arg.event.title}</strong><br>₹${formattedAmount}`
                             };
                         },
                         // dateClick: function(info) {
@@ -84,12 +85,16 @@
                             const event = info.event;
                             const props = event.extendedProps;
 
+                            // Format the amount using the global function
+                            const formattedAmount = formatAmount(props.amount);
+                            const formattedDate = formatDate(event.start);
+
                             // Build HTML for the modal body
                             let details = `
                                 <ul class="list-group" style="text-decoration: none;">
                                     <li class="list-group-item"><strong>Title:</strong> ${event.title}</li>
-                                    <li class="list-group-item"><strong>Date:</strong> ${event.start.toLocaleDateString()}</li>
-                                    <li class="list-group-item"><strong>Amount:</strong> ₹${props.amount}</li>
+                                    <li class="list-group-item"><strong>Date:</strong> ${formattedDate}</li>
+                                    <li class="list-group-item"><strong>Amount:</strong> ₹${formattedAmount}</li>
                                     <li class="list-group-item"><strong>Description:</strong> ${props.description}</li>
                                 </ul>
                             `;
@@ -97,10 +102,17 @@
                             // Insert details into the modal body
                             document.getElementById('eventModalBody').innerHTML = details;
 
-                            // Show the modal using Bootstrap's JS API (Bootstrap 5)
-                            var eventModal = new bootstrap.Modal(document.getElementById(
+                            // Ensure only one modal is shown at a time
+                            const eventModal = bootstrap.Modal.getInstance(document.getElementById(
                                 'eventModal'));
-                            eventModal.show();
+                            if (eventModal) {
+                                eventModal.hide(); // Hide the existing modal if it's open
+                            }
+
+                            // Show the modal using Bootstrap's JS API (Bootstrap 5)
+                            const newModal = new bootstrap.Modal(document.getElementById(
+                                'eventModal'));
+                            newModal.show();
                         },
                         eventMouseEnter: function(info) {
                             // Add a custom class for hover effects

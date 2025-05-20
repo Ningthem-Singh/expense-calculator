@@ -172,7 +172,7 @@ class ExpenseController extends Controller
                 // 'id' => $expense->id,
                 'title' => $expense->title,
                 'start' => $expense->date, // FullCalendar expects dates in 'YYYY-MM-DD' format
-                'amount' => $expense->amount, // Custom property to display the amount
+                'amount' => (float) $expense->amount, // Custom property to display the amount
                 'description' => $expense->description,
             ];
         });

@@ -8,6 +8,26 @@
         Back to Expenses
     </a>
 
+    <div class="mb-3 d-flex justify-content-center">
+        <!-- Month and Year Controls -->
+        <label for="monthSelect" class="me-2 mt-2">Go to:</label>
+        <select id="monthSelect" class="form-select d-inline-block w-auto me-2">
+            @for ($month = 0; $month < 12; $month++)
+                <option value="{{ $month }}" {{ $month == now()->month - 1 ? 'selected' : '' }}>
+                    {{ DateTime::createFromFormat('!m', $month + 1)->format('F') }}
+                </option>
+            @endfor
+        </select>
+
+        <select id="yearSelect" class="form-select d-inline-block w-auto me-2">
+            @for ($year = now()->year - 10; $year <= now()->year + 10; $year++)
+                <option value="{{ $year }}" {{ $year == now()->year ? 'selected' : '' }}>
+                    {{ $year }}
+                </option>
+            @endfor
+        </select>
+    </div>
+
     <!-- FullCalendar Container -->
     <div id="calendar" style="margin-top: 20px;"></div>
 
@@ -91,7 +111,7 @@
 
                             // Build HTML for the modal body
                             let details = `
-                                <ul class="list-group" style="text-decoration: none;">
+                                <ul class="list-group">
                                     <li class="list-group-item"><strong>Title:</strong> ${event.title}</li>
                                     <li class="list-group-item"><strong>Date:</strong> ${formattedDate}</li>
                                     <li class="list-group-item"><strong>Amount:</strong> ₹${formattedAmount}</li>
@@ -125,6 +145,17 @@
 
                     });
                     calendar.render();
+
+                    document.getElementById('monthSelect').addEventListener('change', navigateCalendar);
+                    document.getElementById('yearSelect').addEventListener('change', navigateCalendar);
+
+                    function navigateCalendar() {
+                        const selectedMonth = parseInt(document.getElementById('monthSelect').value, 10);
+                        const selectedYear = parseInt(document.getElementById('yearSelect').value, 10);
+
+                        const newDate = new Date(selectedYear, selectedMonth, 1);
+                        calendar.gotoDate(newDate);
+                    }
                 })
                 .catch(error => console.error('Error fetching calendar data:', error));
         });

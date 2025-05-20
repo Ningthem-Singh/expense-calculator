@@ -8,10 +8,10 @@
 
 /* Hover effect for calendar events */
 .fc-event-hover {
-    transform: scale(1.1);
-    /* Enlarge the event more prominently */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-    /* Add a deeper shadow */
+    transform: scale(0.95);
+    /* Shrink the event slightly */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Add a subtle shadow */
     z-index: 100;
     /* Bring the hovered event to the front */
 }

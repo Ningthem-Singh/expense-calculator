@@ -13,13 +13,14 @@ class ExpenseController extends Controller
     // Show all expenses grouped by date
     public function expenses_index()
     {
-        $expenses = Expense::orderBy('date', 'desc')->orderBy('id', 'desc')->cursorPaginate(10);
+        $expenses = Expense::orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate(10);
+
         $groupedExpenses = $expenses->groupBy('date');
 
-        // Convert the next cursor to a string
         $nextCursor = $expenses->nextCursor()?->encode(); // Encode the cursor to a string
-        // $nextCursor = $expenses->nextCursor();
-        // dd($nextCursor);
+
         return view('expenses.index', compact('expenses', 'groupedExpenses', 'nextCursor'));
     }
 
@@ -58,12 +59,8 @@ class ExpenseController extends Controller
         try {
             DB::beginTransaction();
 
-            if ($request->hasFile('expense_proof')) {
-                $filePath = $request->file('expense_proof')->store('expense_proofs', 'public');
-                $validatedData['expense_proof'] = $filePath;
-            }
+            Expense::storeExpense($validatedData);
 
-            Expense::create($validatedData);
             DB::commit();
 
             return redirect()->route('expenses_index')->with('success', 'Expense added successfully!');
@@ -82,7 +79,9 @@ class ExpenseController extends Controller
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
             abort(404, 'Invalid date format.');
         }
+
         $expenses = Expense::where('date', $date)->get();
+
         return view('expenses.show', compact('expenses', 'date'));
     }
 
@@ -100,30 +99,15 @@ class ExpenseController extends Controller
         try {
             DB::beginTransaction();
 
-            if ($request->hasFile('expense_proof')) {
-                // Delete old file if it exists
-                if ($expense->expense_proof) {
-                    Storage::disk('public')->delete($expense->expense_proof);
-                }
-                $filePath = $request->file('expense_proof')->store('expense_proofs', 'public');
-                $validatedData['expense_proof'] = $filePath;
-            }
+            $expense->updateExpense($validatedData);
 
-            if ($request->input('remove_proof')) {
-                if ($expense->expense_proof) {
-                    Storage::disk('public')->delete($expense->expense_proof);
-                }
-                $validatedData['expense_proof'] = null; // Set proof to null
-            }
-
-            $expense->update($validatedData);
             DB::commit();
 
             return redirect()->route('expenses_index')->with('success', 'Expense updated successfully!');
         } catch (\Exception $e) {
-
             DB::rollBack();
             Log::error('Error updating expense: ' . $e->getMessage());
+
             return redirect()->back()->withInput()->withErrors(['error' => 'An error occurred while updating the expense. Please try again.']);
         }
     }
@@ -133,6 +117,7 @@ class ExpenseController extends Controller
         if (!$expense) {
             abort(404, 'Expense not found');
         }
+
         return view('expenses.edit', compact('expense'));
     }
 
@@ -141,11 +126,8 @@ class ExpenseController extends Controller
         try {
             DB::beginTransaction();
 
-            if ($expense->expense_proof) {
-                Storage::disk('public')->delete($expense->expense_proof);
-            }
+            $expense->deleteExpense();
 
-            $expense->delete();
             DB::commit();
 
             return redirect()->route('expenses_index')->with('success', 'Expense deleted successfully!');
@@ -164,22 +146,8 @@ class ExpenseController extends Controller
 
     public function expenses_calendar_data()
     {
-        // Fetch all expenses and format them for FullCalendar
-        $expenses = Expense::all();
+        $events = Expense::getCalendarData();
 
-        $events = $expenses->map(function ($expense) {
-            return [
-                'id' => $expense->id,
-                'title' => $expense->title,
-                'start' => $expense->date, // FullCalendar expects dates in 'YYYY-MM-DD' format
-                'formattedDate' => formatDate($expense->date), // Custom property to display date
-                'formattedAmount' => formatAmount($expense->amount), // Custom property to display amount
-                'description' => $expense->description,
-                'expenseProof' => $expense->expense_proof ? asset('storage/' . $expense->expense_proof) : null,
-            ];
-        });
-
-        // dd($events);
         return response()->json($events);
     }
 }

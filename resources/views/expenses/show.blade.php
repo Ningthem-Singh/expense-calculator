@@ -8,7 +8,7 @@
     <ul class="list-group" style="border: 1px solid black">
         @foreach ($expenses as $expense)
             <li class="list-group-item" style="border: 2px solid grey">
-                <b>{{ $expense->title }} - ₹{{ number_format($expense->amount, 2) }}</b>
+                <b>{{ $expense->title }} - ₹{{ formatAmount($expense->amount) }}</b>
                 @if ($expense->description)
                     <p class="mt-2"><em>{{ $expense->description }}</em></p>
                 @endif

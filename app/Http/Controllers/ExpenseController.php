@@ -175,6 +175,7 @@ class ExpenseController extends Controller
                 'formattedDate' => formatDate($expense->date), // Custom property to display date
                 'formattedAmount' => formatAmount($expense->amount), // Custom property to display amount
                 'description' => $expense->description,
+                'expenseProof' => $expense->expense_proof ? asset('storage/' . $expense->expense_proof) : null,
             ];
         });
 

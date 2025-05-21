@@ -46,7 +46,23 @@
             </div>
         </div>
     </div>
-    {{-- Onclick preview model to show up --}}
+    {{-- end Onclick preview model to show up --}}
+
+    <!-- Expense Proof Preview Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="previewModalLabel">Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Preview Content -->
+                    <div id="previewContent" class="d-flex justify-content-center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -81,9 +97,9 @@
                                 },
                                 buttonText: 'Multi-Month'
                             },
-                            list:{
-                                type:'list',
-                                buttonText:'Show List'
+                            list: {
+                                type: 'list',
+                                buttonText: 'Show List'
                             }
                         },
                         events: data, // Pass the fetched expenses as events
@@ -121,6 +137,10 @@
                                     <li class="list-group-item"><strong>Date:</strong> ${props.formattedDate}</li>
                                     <li class="list-group-item"><strong>Amount:</strong> ₹${props.formattedAmount}</li>
                                     <li class="list-group-item"><strong>Description:</strong> ${props.description}</li>
+                                    <li class="list-group-item">
+                                        <strong>Proof:</strong><br>
+                                        ${renderProof(props.expenseProof)}
+                                    </li>
                                 </ul>
                             `;
 
@@ -188,5 +208,49 @@
                     console.error('Error fetching calendar data:', error);
                 });
         });
+
+        // render for expense proof
+        function renderProof(expenseProof) {
+            if (!expenseProof || expenseProof.trim() === '') {
+                return 'No proof available';
+            }
+
+            if (expenseProof.endsWith('.pdf')) {
+                return `
+                <button class="btn btn-sm btn-danger" onclick="openPreview('${expenseProof}')">View PDF</button>
+            `;
+            }
+
+            return `
+            <img src="${expenseProof}" alt="Expense Proof" style="max-width: 100px; cursor: pointer;" onclick="openPreview('${expenseProof}')">
+        `;
+        }
+        // end render for expense proof
+
+        // openPreview in iframe
+        function openPreview(proofUrl) {
+            const previewContent = document.getElementById('previewContent');
+            previewContent.innerHTML = ''; // Clear previous content
+
+            // Extract file extension from the URL
+            const fileExtension = proofUrl.split('.').pop().toLowerCase();
+
+            if (fileExtension === 'pdf') {
+                // Embed PDF in an iframe
+                previewContent.innerHTML = `
+            <iframe src="${proofUrl}" width="100%" height="500px" style="border: none;"></iframe>
+            `;
+            } else {
+                // Display image
+                previewContent.innerHTML = `
+            <img src="${proofUrl}" alt="Preview" style="max-width: 100%; height: auto;">
+            `;
+            }
+
+            // Show the preview modal
+            const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+            previewModal.show();
+        }
+        // end openPreview in iframe
     </script>
 @endsection

@@ -4,13 +4,13 @@
 @foreach ($groupedExpenses as $date => $dailyExpenses)
     <div class="card mb-3">
         <div class="card-header">
-            <strong>{{ $date }}</strong>
+            <strong>{{ formatDate($date) }}</strong>
             <a href="{{ route('expenses_showByDate', $date) }}" class="float-end">View Details</a>
         </div>
         <ul class="list-group list-group-flush">
             @foreach ($dailyExpenses as $expense)
                 <li class="list-group-item">
-                    {{ $expense->title }} - ₹{{ number_format($expense->amount, 2) }}
+                    {{ $expense->title }} - ₹{{ formatAmount($expense->amount) }}
                     <div class="mt-2">
                         <a href="{{ route('expenses_edit', $expense->id) }}" class="btn btn-sm btn-warning">Edit</a>
                         <form action="{{ route('expenses_destroy', $expense->id) }}" method="POST" class="d-inline">

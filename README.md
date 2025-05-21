@@ -112,6 +112,10 @@ Now visit `http://127.0.0.1:8000` in your browser to use the app.
 For more advanced usage, see the [Laravel documentation](https://laravel.com/docs).
 
 ---
+## Stuff that I Did
+1. [Custom Format for client and server side](READMEGROUP/custom_format.md)
+
+---
 
 ## Testing
 

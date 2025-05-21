@@ -1,7 +1,7 @@
 @extends('layouts.layout_app')
 
 @section('content')
-    <h1>Expenses for {{ $date }}</h1>
+    <h1>Expenses for {{ formatDate($date) }}</h1>
 
     <a href="{{ route('expenses_index') }}" class="btn btn-secondary mb-3">Back</a>
 

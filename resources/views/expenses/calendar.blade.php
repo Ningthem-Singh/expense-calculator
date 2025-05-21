@@ -70,23 +70,29 @@
                             right: 'dayGridMonth,multiMonthYear,list' // Views: Month, Year, List
                         },
                         views: {
+                            dayGridMonth: {
+                                type: 'dayGridMonth',
+                                buttonText: 'Month'
+                            },
                             multiMonthYear: {
                                 type: 'multiMonth',
                                 duration: {
                                     years: 1
                                 },
                                 buttonText: 'Multi-Month'
+                            },
+                            list:{
+                                type:'list',
+                                buttonText:'Show List'
                             }
                         },
                         events: data, // Pass the fetched expenses as events
                         eventContent: function(arg) {
-                            // Format the amount using Intl.NumberFormat
-                            const formattedAmount = formatAmount(arg.event.extendedProps
-                                .amount);
 
                             // Return the HTML for the event
                             return {
-                                html: `<strong>${arg.event.title}</strong><br>₹${formattedAmount}`
+                                html: `<strong>${arg.event.title}</strong><br>₹${arg.event.extendedProps
+                                .formattedAmount}`
                             };
                         },
                         // dateClick: function(info) {
@@ -98,23 +104,22 @@
                         // console.log('====================================');
                         // }
                         eventClick: function(info) {
+                            // console.log('====================================');
+                            // console.log(info);
+                            // console.log('====================================');
                             // Prevent the default browser navigation
                             info.jsEvent.preventDefault();
 
                             // Get all event data
                             const event = info.event;
-                            const props = event.extendedProps;
-
-                            // Format the amount using the global function
-                            const formattedAmount = formatAmount(props.amount);
-                            const formattedDate = formatDate(event.start);
+                            const props = info.event.extendedProps;
 
                             // Build HTML for the modal body
                             let details = `
                                 <ul class="list-group">
                                     <li class="list-group-item"><strong>Title:</strong> ${event.title}</li>
-                                    <li class="list-group-item"><strong>Date:</strong> ${formattedDate}</li>
-                                    <li class="list-group-item"><strong>Amount:</strong> ₹${formattedAmount}</li>
+                                    <li class="list-group-item"><strong>Date:</strong> ${props.formattedDate}</li>
+                                    <li class="list-group-item"><strong>Amount:</strong> ₹${props.formattedAmount}</li>
                                     <li class="list-group-item"><strong>Description:</strong> ${props.description}</li>
                                 </ul>
                             `;
@@ -141,6 +146,12 @@
                         eventMouseLeave: function(info) {
                             // Remove the custom class when the mouse leaves
                             info.el.classList.remove('fc-event-hover');
+                        },
+                        datesSet: function(info) {
+                            // Update the dropdowns when the calendar's view changes
+                            const currentDate = info.view
+                                .currentStart; // Get the current start date of the view
+                            updateDropdowns(currentDate);
                         }
 
                     });
@@ -156,8 +167,26 @@
                         const newDate = new Date(selectedYear, selectedMonth, 1);
                         calendar.gotoDate(newDate);
                     }
+
+                    // Function to update dropdowns based on the calendar's current date
+                    function updateDropdowns(date) {
+                        const monthSelect = document.getElementById('monthSelect');
+                        const yearSelect = document.getElementById('yearSelect');
+
+                        // Set the selected month
+                        monthSelect.value = date.getMonth();
+
+                        // Set the selected year
+                        yearSelect.value = date.getFullYear();
+                    }
+
+                    // Initialize dropdowns with the current date
+                    const today = new Date();
+                    updateDropdowns(today);
                 })
-                .catch(error => console.error('Error fetching calendar data:', error));
+                .catch(error => {
+                    console.error('Error fetching calendar data:', error);
+                });
         });
     </script>
 @endsection
